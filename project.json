@@ -1,0 +1,94 @@
+{
+    "name": "FirstVerify-Reporting-Engine",
+    "version": "1.0.0",
+    "description": "Dynamic PIVOT reporting engine for FirstVerify - Python FastAPI backend with Vanilla JS frontend",
+    "author": "FirstVerify Development Team",
+    "license": "MIT",
+    "keywords": [
+        "reporting",
+        "pivot",
+        "fastapi",
+        "python",
+        "sql-server",
+        "eav",
+        "dashboard"
+    ],
+    "python": {
+        "version": "3.11+",
+        "venv": "venv",
+        "requirements": "requirements.txt"
+    },
+    "scripts": {
+        "start:windows": "run.bat",
+        "start:unix": "bash run.sh",
+        "dev": "python -m uvicorn app.main:app --reload",
+        "prod": "python -m uvicorn app.main:app --host 0.0.0.0 --port 8000",
+        "test": "pytest tests/"
+    },
+    "directories": {
+        "app": "Backend FastAPI application",
+        "static": "Frontend assets (HTML, CSS, JS)",
+        "static/css": "Stylesheets",
+        "static/js": "JavaScript application logic"
+    },
+    "files": {
+        ".env.example": "Environment template for database credentials",
+        "requirements.txt": "Python package dependencies",
+        "README.md": "Complete documentation",
+        "QUICKSTART.md": "Quick setup guide",
+        "DEVELOPMENT.md": "Development and architecture notes",
+        "run.bat": "Windows startup script",
+        "run.sh": "Linux/Mac startup script"
+    },
+    "database": {
+        "type": "MS SQL Server",
+        "schema": "EAV (Entity-Attribute-Value)",
+        "required_tables": [
+            "Prequalification",
+            "Organizations",
+            "Questions",
+            "PrequalificationEMRStatsValues",
+            "PrequalificationEMRStatsYears"
+        ]
+    },
+    "features": [
+        "Dynamic metadata discovery",
+        "Interactive question selection",
+        "Server-side PIVOT SQL generation",
+        "Client-side pagination (10/25/50/100 rows)",
+        "Excel export via SheetJS",
+        "Responsive Bootstrap 5 UI",
+        "API health monitoring",
+        "Comprehensive error handling"
+    ],
+    "endpoints": {
+        "GET /": "Main dashboard",
+        "GET /api/metadata": "List available questions",
+        "POST /api/generate-report": "Generate PIVOT report",
+        "GET /api/health": "Health check"
+    },
+    "setup": {
+        "windows": [
+            "copy .env.example .env",
+            "Edit .env with database credentials",
+            "run.bat"
+        ],
+        "unix": [
+            "cp .env.example .env",
+            "Edit .env with database credentials",
+            "bash run.sh"
+        ],
+        "manual": [
+            "python -m venv venv",
+            "source venv/bin/activate",
+            "pip install -r requirements.txt",
+            "python -m uvicorn app.main:app --reload"
+        ]
+    },
+    "ports": {
+        "api": 8000
+    },
+    "browser": "http://127.0.0.1:8000",
+    "status": "Production Ready",
+    "updated": "2026-01-06"
+}

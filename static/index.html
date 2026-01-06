@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FirstVerify Dynamic Reporting Engine</title>
+
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Custom Styles -->
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+
+<body>
+    <div id="app">
+        <!-- Alert Container -->
+        <div id="alertContainer" style="position: fixed; top: 20px; right: 20px; z-index: 1000; max-width: 400px;">
+        </div>
+
+        <!-- Loading Indicator -->
+        <div id="loadingIndicator" class="loading-spinner hidden">
+            <div class="spinner"></div>
+            <span>Loading data...</span>
+        </div>
+
+        <!-- Main Container -->
+        <div class="container-full">
+            <!-- ==================== SIDEBAR ====================-->
+            <aside class="sidebar">
+                <h2>Questions</h2>
+                <p class="text-muted" style="font-size: 12px; margin-bottom: 15px;">
+                    Select questions to include in the report <span class="selected-count" id="selectedCount">0</span>
+                </p>
+
+                <!-- Question Controls -->
+                <div style="margin-bottom: 15px; display: flex; gap: 8px;">
+                    <button class="btn btn-sm btn-primary" id="selectAllBtn">
+                        ✓ All
+                    </button>
+                    <button class="btn btn-sm btn-secondary" id="clearAllBtn">
+                        ✗ Clear
+                    </button>
+                </div>
+
+                <!-- Questions List -->
+                <div id="questionsContainer" class="question-group">
+                    <p class="text-muted text-center mt-20">Loading questions...</p>
+                </div>
+            </aside>
+
+            <!-- ==================== MAIN CONTENT ====================-->
+            <div class="main-content">
+                <!-- Header -->
+                <header class="header">
+                    <h1>📊 FirstVerify Dynamic Reporting Engine</h1>
+                    <p>Generate pivoted safety and financial reports based on selected questions</p>
+
+                    <!-- Action Buttons -->
+                    <div class="button-group">
+                        <button class="btn btn-primary" id="generateBtn" disabled>
+                            🔄 Generate Report
+                        </button>
+                        <button class="btn btn-success hidden" id="exportBtn">
+                            📥 Export to Excel
+                        </button>
+                    </div>
+                </header>
+
+                <!-- Report Content Area -->
+                <div class="content-area">
+                    <div id="tableContainer" class="table-container">
+                        <div class="empty-state">
+                            <div class="empty-state-icon">📋</div>
+                            <h3>No Report Generated</h3>
+                            <p>Select questions from the sidebar and click "Generate Report" to view results</p>
+                        </div>
+                    </div>
+
+                    <!-- Pagination Controls -->
+                    <div class="pagination-container">
+                        <div class="pagination-info" id="paginationInfo">
+                            No data
+                        </div>
+                        <div class="pagination-controls">
+                            <button class="pagination-btn" id="prevPageBtn" disabled>← Previous</button>
+                            <button class="pagination-btn" id="nextPageBtn" disabled>Next →</button>
+                            <div class="page-size-selector">
+                                <label for="pageSizeSelect">Rows per page:</label>
+                                <select id="pageSizeSelect">
+                                    <option value="10">10</option>
+                                    <option value="25">25</option>
+                                    <option value="50">50</option>
+                                    <option value="100">100</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== SCRIPTS ====================-->
+    <!-- SheetJS for Excel export -->
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
+    <!-- Bootstrap 5 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Application Logic -->
+    <script src="/static/js/app.js"></script>
+
+    <!-- Version Info -->
+    <script>
+        console.log('FirstVerify Dynamic Reporting Engine v1.0.0');
+        console.log('Backend: Python 3.11+ FastAPI');
+        console.log('Frontend: Vanilla JavaScript + Bootstrap 5');
+    </script>
+</body>
+
+</html>
