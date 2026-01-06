@@ -1,17 +1,23 @@
 """
 FastAPI backend for FirstVerify Dynamic Reporting Engine (V1.0)
 """
-from fastapi import FastAPI, HTTPException, Request
-from fastapi.staticfiles import StaticFiles
-from fastapi.responses import HTMLResponse
-from pydantic import BaseModel
-from typing import List, Dict, Any
-import os
-import logging
-from pathlib import Path
-
-from app.database import DatabaseConnection
 from app.pivot_generator import PivotSQLGenerator
+from app.database import DatabaseConnection
+import logging
+from typing import List, Dict, Any
+from pydantic import BaseModel
+from fastapi.responses import HTMLResponse, JSONResponse
+from fastapi.staticfiles import StaticFiles
+from fastapi import FastAPI, HTTPException, Request
+import os
+from pathlib import Path
+from dotenv import load_dotenv
+
+# Load environment variables at the very top, before any other imports
+# Look for .env in parent directory of app folder
+env_path = Path(__file__).parent.parent / ".env"
+load_dotenv(dotenv_path=env_path)
+
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -50,14 +56,21 @@ class ReportResponse(BaseModel):
 # ==================== Routes ====================
 
 
+# @app.get("/", response_class=HTMLResponse)
+# async def get_dashboard():
+#     """Serve the main dashboard HTML."""
+#     index_path = Path(__file__).parent.parent / "static" / "index.html"
+#     if index_path.exists():
+#         with open(index_path, "r") as f:
+#             return f.read()
+#     return "<h1>Dashboard not found</h1>"
+
+
 @app.get("/", response_class=HTMLResponse)
 async def get_dashboard():
-    """Serve the main dashboard HTML."""
-    index_path = Path(__file__).parent.parent / "static" / "index.html"
-    if index_path.exists():
-        with open(index_path, "r") as f:
-            return f.read()
-    return "<h1>Dashboard not found</h1>"
+    # Explicitly set encoding to utf-8 to prevent the 'charmap' crash on Windows
+    with open("static/index.html", "r", encoding="utf-8") as f:
+        return f.read()
 
 
 @app.get("/api/metadata", tags=["Metadata"])
@@ -156,10 +169,13 @@ async def health_check():
 @app.exception_handler(HTTPException)
 async def http_exception_handler(request: Request, exc: HTTPException):
     """Custom HTTP exception handler."""
-    return {
-        "error": exc.detail,
-        "status_code": exc.status_code
-    }
+    return JSONResponse(
+        status_code=exc.status_code,
+        content={
+            "error": exc.detail,
+            "status_code": exc.status_code
+        }
+    )
 
 if __name__ == "__main__":
     import uvicorn

@@ -4,9 +4,6 @@ Database connection and utilities for MS SQL Server.
 import os
 import pyodbc
 from typing import List, Dict, Any
-from dotenv import load_dotenv
-
-load_dotenv()
 
 
 class DatabaseConnection:
@@ -20,16 +17,53 @@ class DatabaseConnection:
         self.password = os.getenv("DB_PASSWORD")
         self.driver = os.getenv("DB_DRIVER", "ODBC Driver 17 for SQL Server")
 
+        # Validate configuration on initialization
+        if not self.server or not self.database:
+            raise ValueError(
+                "Database configuration missing in .env file. "
+                "Please ensure DB_SERVER and DB_DATABASE are set."
+            )
+
     def get_connection(self):
-        """Create and return a database connection."""
-        connection_string = (
-            f"Driver={{{self.driver}}};"
-            f"Server={self.server};"
-            f"Database={self.database};"
-            f"UID={self.username};"
-            f"PWD={self.password};"
-        )
-        return pyodbc.connect(connection_string)
+        """Create and return a database connection.
+
+        Raises:
+            ValueError: If database configuration is incomplete
+            pyodbc.Error: If connection fails
+        """
+        if not self.server or not self.database:
+            raise ValueError(
+                "Database configuration missing. "
+                "Ensure DB_SERVER and DB_DATABASE are set in .env file."
+            )
+
+        try:
+            # Build connection string
+            # Server value may contain backslash (e.g., localhost\SQLEXPRESS)
+            if self.username and self.password:
+                # SQL Server authentication
+                conn_str = (
+                    f"DRIVER={{{self.driver}}};"
+                    f"SERVER={self.server};"
+                    f"DATABASE={self.database};"
+                    f"UID={self.username};"
+                    f"PWD={self.password};"
+                )
+            else:
+                # Windows authentication (Trusted Connection)
+                conn_str = (
+                    f"DRIVER={{{self.driver}}};"
+                    f"SERVER={self.server};"
+                    f"DATABASE={self.database};"
+                    f"Trusted_Connection=yes;"
+                )
+
+            return pyodbc.connect(conn_str)
+        except pyodbc.Error as e:
+            raise ValueError(
+                f"Failed to connect to database server '{self.server}', "
+                f"database '{self.database}'. Error: {str(e)}"
+            )
 
     def execute_query(self, query: str, params: tuple = None) -> List[Dict[str, Any]]:
         """
@@ -68,17 +102,27 @@ class DatabaseConnection:
 
     def get_metadata(self) -> List[str]:
         """
-        Fetch all unique QuestionText values from PrequalificationEMRStatsValues.
+        Fetch all unique QuestionText values that have actual data.
+
+        Only returns questions that exist in PrequalificationEMRStatsValues,
+        ensuring no empty questions are shown.
 
         Returns:
-            List of unique question texts
+            List of unique question texts (ordered alphabetically)
         """
         query = """
         SELECT DISTINCT LEFT(q.QuestionText, 120) AS QuestionText
-        FROM PrequalificationEMRStatsValues pesv
-        JOIN Questions q ON q.QuestionID = pesv.QuestionId
-        WHERE q.QuestionText IS NOT NULL
-        ORDER BY QuestionText
+        FROM dbo.Questions q
+        INNER JOIN dbo.PrequalificationEMRStatsValues pesv 
+            ON q.QuestionID = pesv.QuestionId
+        WHERE q.QuestionText IS NOT NULL 
+            AND LEN(TRIM(q.QuestionText)) > 0
+        ORDER BY QuestionText ASC
         """
-        results = self.execute_query(query)
-        return [row['QuestionText'] for row in results]
+        try:
+            results = self.execute_query(query)
+            questions = [row['QuestionText'] for row in results]
+            return questions
+        except Exception as e:
+            print(f"Error fetching metadata: {str(e)}")
+            raise
